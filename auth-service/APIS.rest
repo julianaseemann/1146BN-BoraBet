@@ -1,0 +1,38 @@
+### 🔹 Login com email e senha
+POST http://127.0.0.1:8080/auth-service/auth/login/password
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "novo@teste.com",
+  "password": "senha123"
+}
+
+### 🔹 Solicitar link mágico por e-mail
+POST http://127.0.0.1:8080/auth-service/auth/login/magic
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "usuario@teste.com"
+}
+
+### 🔹 Verificar link mágico (token)
+POST http://127.0.0.1:8080/auth-service/auth/login/magic/verify
+Content-Type: application/json
+Accept: application/json
+
+{
+  "token": "exemploTokenMagicLink123"
+}
+
+### 🔹 Criar novo usuário
+POST http://127.0.0.1:8080/auth-service/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Novo Usuário",
+  "email": "novo@teste.com",
+  "password": "senha123"
+}

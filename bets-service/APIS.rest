@@ -1,0 +1,43 @@
+### 🔹 Listar jogos
+GET http://127.0.0.1:8080/bets-service/matches
+Accept: application/json
+
+
+### 🔹 Listar mercados de um jogo
+GET http://127.0.0.1:8080/bets-service/markets?matchId=101
+Accept: application/json
+
+
+### 🔹 Criar uma aposta
+POST http://127.0.0.1:8080/bets-service/bets
+Content-Type: application/json
+Accept: application/json
+
+{
+  "matchId": 101,
+  "marketId": 5001,
+  "selectionCode": "HOME",
+  "stake": 50.0,
+  "expectedOdds": 1.95,
+  "idempotencyKey": "teste123"
+}
+
+
+### 🔹 Listar apostas do usuário atual
+GET http://127.0.0.1:8080/bets-service/bets
+Accept: application/json
+
+
+### 🔹 Obter detalhe de uma aposta
+GET http://127.0.0.1:8080/bets-service/bets/90001
+Accept: application/json
+
+
+### 🔹 Fazer cashout de uma aposta
+POST http://127.0.0.1:8080/bets-service/bets/90001/cashout
+Content-Type: application/json
+Accept: application/json
+
+{
+  "acceptAmount": 70.5
+}
