@@ -22,11 +22,11 @@ public class AuthorizationFilter implements WebFilter {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    // Rotas públicas (não precisam de autenticação)
+    // Rotas públicas do Gateway
     private static final List<String> PUBLIC_ROUTES = List.of(
-        "/auth-service/auth",
-        "/auth-service/users",
-        "/matches-service/matches",
+        "/auth-service/auth",          // login
+        "/auth-service/users",         // cadastro
+        "/matches-service/matches", 
         "/tournaments-service/tournaments"
     );
 
@@ -46,18 +46,18 @@ public class AuthorizationFilter implements WebFilter {
         String path = request.getPath().toString();
         String method = request.getMethod().name();
 
-        // 1️⃣ LIBERAR OPTIONS (preflight CORS)
+        // 1) OS BROWSERS SEMPRE ENVIAM OPTIONS → LIBERAR TOTALMENTE
         if (method.equalsIgnoreCase("OPTIONS")) {
             exchange.getResponse().setStatusCode(HttpStatus.OK);
             return exchange.getResponse().setComplete();
         }
 
-        // 2️⃣ Rotas públicas NÃO exigem autenticação
+        // 2) Rotas públicas
         if (isPublicRoute(path)) {
             return chain.filter(exchange);
         }
 
-        // 3️⃣ Para qualquer outra rota, é obrigatório ter Authorization: Bearer xxx
+        // 3) Exigir token nas demais rotas
         String authHeader = request.getHeaders().getFirst("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return unauthorized(exchange);
@@ -65,23 +65,20 @@ public class AuthorizationFilter implements WebFilter {
 
         String token = authHeader.substring(7);
 
-        // 4️⃣ Validar JWT
-        DecodedJWT jwt;
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret.getBytes(StandardCharsets.UTF_8));
             JWTVerifier verifier = JWT.require(algorithm).build();
-            jwt = verifier.verify(token);
+            DecodedJWT jwt = verifier.verify(token);
+
+            // Verificar tipo do token
+            if (!"access".equals(jwt.getClaim("type").asString())) {
+                return unauthorized(exchange);
+            }
+
         } catch (Exception e) {
             return unauthorized(exchange);
         }
 
-        // 5️⃣ Verificar se é token do tipo ACCESS
-        String tokenType = jwt.getClaim("type").asString();
-        if (!"access".equals(tokenType)) {
-            return unauthorized(exchange);
-        }
-
-        // 6️⃣ Token válido → segue
         return chain.filter(exchange);
     }
 }
